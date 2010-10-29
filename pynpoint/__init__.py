@@ -1,2 +1,2 @@
-import pydislocated.config
-import pydislocated.server
+import pynpoint.config
+import pynpoint.server
