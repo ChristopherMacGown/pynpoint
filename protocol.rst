@@ -19,12 +19,15 @@ Request Types
 +----------------+----------------------------------+-----------------------------+
 | hi!            | {'host':'address', 'port':port } | Any recipient responds hi!  |
 +----------------+----------------------------------+-----------------------------+
-| i_have         | {'type': export_type,            | Recipients respond with     |
+| i have         | {'type': export_type,            | Recipients respond with     |
 |                |  'export': dict()}               | sha1 of json                |
 +----------------+----------------------------------+-----------------------------+
 | valid export types: interfaces, services, disks, hosts                          |
 +----------------+----------------------------------+-----------------------------+
-| heard_of?      | {query_type: value }             | Returns an i_have for value |
+| heard of?      | {query_type: value }             | Returns an i have for value |
 +----------------+----------------------------------+-----------------------------+
-| valid query_types: 'host', 'service', 'disk'                                    |
+| valid query_types: 'host', 'service', 'disk','interfaces'                       |
 +----------------+----------------------------------+-----------------------------+
+
+
+
