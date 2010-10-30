@@ -17,7 +17,9 @@ Request Types
 +----------------+----------------------------------+-----------------------------+
 |  Request Type  |          Expected JSON           |        Response?            |
 +----------------+----------------------------------+-----------------------------+
-| hi!            | {'host':'address', 'port':port } | Any recipient responds hi!  |
+| hi!            | {'host':'address',               | Any recipient responds hi!  |
+|                |  'port':port,                    |                             |
+|                |  'dh_key_init':???}              |                             |
 +----------------+----------------------------------+-----------------------------+
 | i have         | {'type': export_type,            | Recipients respond with     |
 |                |  'export': dict()}               | sha1 of json                |
