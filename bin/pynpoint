@@ -1,0 +1,3 @@
+import pynpoint
+server = pynpoint.server.Server()
+server.run()
