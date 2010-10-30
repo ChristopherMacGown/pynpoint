@@ -1,13 +1,21 @@
-import config
+"""
+The pynpoint gossip protocol listener
+"""
+
 import eventlet
 import logging
 
-"""
-The pydislocate gossip protocol listener
-"""
+from pynpoint import config, protocol
+
+
+class CloseSession(Exception):
+    """ Closes the connection """
+    pass
 
 
 class FriendlyConnection(object):
+    """ An inbound connection with message """
+
     def __init__(self, sock_address, server):
         self.socket, self.address = sock_address
         self.server = server
@@ -20,10 +28,28 @@ class FriendlyConnection(object):
                 return False
 
     def handle_inbound(self):
+        """
+            Handles inbound data, if it's a Packet decodes it, otherwise
+            closes the connection
+        """
         try:
-            raw_data = self.socket
-            print raw_data.recv(1024)
+            # Grab all of the data on the wire, and create a protocol.Packet
+            # out of it.
+            # TODO(chris): Improve performance by reading each field as it
+            #              comes across the wire.
+            packet = ""
+            terminator_pos = -1 * len(protocol.TERMINATOR)
+            while True:
+                if len(packet) > 1 and \
+                   packet.rstrip()[terminator_pos:] == protocol.TERMINATOR:
+                    break
 
+                packet = packet + self.socket.recv(1024)
+
+            print packet
+            packet = protocol.Packet.decode(packet)
+            print packet
+            return True
         except CloseSession:
             return False
 
@@ -33,8 +59,7 @@ class Server(object):
     The pydislocated gossip protocol listener
     """
 
-
-    def __init__(self, host=config.hostname, port=config.port):
+    def __init__(self, host=config.HOSTNAME, port=config.PORT):
         """ Initialize everything """
 
         self.host = host
@@ -53,11 +78,7 @@ class Server(object):
                 eventlet.spawn_n(self.handle_inbound, self.socket.accept())
         except KeyboardInterrupt:
             return True
-    
 
     def handle_inbound(self, address):
+        """ Loops over the messages coming from the client """
         FriendlyConnection(address, self).loop()
-
-
-
-

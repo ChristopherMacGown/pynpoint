@@ -1,3 +1,8 @@
+"""
+Defines the pynpoint protocol with a Packet handler.
+"""
+
+
 import json
 import struct
 
@@ -11,12 +16,38 @@ HEADER_DELIMITER = "|"
 BODY_DELIMITER = "\n"
 TERMINATOR = "!!"
 
+SUPPORTED_VERSIONS = [VERSION]
+
 
 class ProtocolError(Exception):
     """ A generic protocol error class """
     # TODO(chris): Handle logging here.
     pass
 
+
+class Announcement(object):
+    pass
+
+class Export(object):
+    pass
+
+class Query(object):
+    pass
+
+
+def dispatch_job_handler(packet):
+    request_types = { 
+        "hi!": Announcement,
+        "i have": Export,
+        "heard of?": Query,
+    }
+
+    try:
+        handler = request_types[packet.request_type]
+    except KeyError:
+        raise ProtocolError("invalid request_type %s" % packet.request_type)
+
+    return handler(packet.payload)
 
 class Packet(object):
     """ A pynpoint packet """
@@ -25,6 +56,14 @@ class Packet(object):
         self.request_type = request_type
         self.payload = payload
         self.size = len(self.request_type) + len(self.body()) + 1
+
+    def __eq__(self, other):
+        if type(other) == Packet and \
+           self.payload == other.payload and \
+           self.request_type == other.request_type:
+            return True
+
+        return False
 
     def encode(self):
         """ Encodes a packet """
@@ -45,19 +84,23 @@ class Packet(object):
     @classmethod
     def decode(cls, packet):
         """ Takes a string and attempts to decode it as a pynpoint packet """
+
+        # Strip the packet terminator
         packet = packet.rstrip()[0:-len(TERMINATOR)]
 
-        header_id, version, size, req_and_body = packet.split(HEADER_DELIMITER)
         try:
-            header_id, version, size, req_and_body = packet.split(HEADER_DELIMITER)
+            header, version, sz, req_and_body = packet.split(HEADER_DELIMITER)
 
-            if header_id == HEADER_IDENTIFIER and \
-               struct.unpack(SIZE_PACK_FORMAT, size)[0] == len(req_and_body):
+            version = struct.unpack(VERSION_PACK_FORMAT, version)[0]
+            size = struct.unpack(SIZE_PACK_FORMAT, sz)[0]
+
+            if header == HEADER_IDENTIFIER and \
+               version in SUPPORTED_VERSIONS and \
+               size == len(req_and_body):
                 #TODO(chris): handle validation
                 req, body = req_and_body.split('\n')
                 body = json.JSONDecoder().decode(body)
                 return Packet(req, body)
 
-
         except (ValueError, ProtocolError):
-            raise ProtocolError, "invalid packet: %s" % packet
+            raise ProtocolError("invalid packet: %s" % packet)
