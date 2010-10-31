@@ -10,7 +10,7 @@ class ProtocolTestCase(unittest.TestCase):
         self.packet = protocol.Packet('test', {'test': 'data'})
 
     def test_packet_encode(self):
-        self.assertEqual('pnpt|\x01|\x00\x15|test\n{"test": "data"}!!', 
+        self.assertEqual('pnpt|\x01|\x00\x00\x00\x15|test\n{"test": "data"}!!', 
                          self.packet.encode())
 
     def test_packet_decode(self):

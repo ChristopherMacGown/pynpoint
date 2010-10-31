@@ -1,11 +1,7 @@
-import pynpoint
-import socket
+from pynpoint import client, config, protocol
 
-host = pynpoint.config.hostname
-port = pynpoint.config.port
+host = config.hostname
+port = config.port
+packet = protocol.Packet('hi!', {'host': host, 'port': port})
 
-packet = pynpoint.protocol.Packet('hi!', {'host':host, 'port':port})
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect((host, port))
-sock.sendall(packet.encode())
+client.Client().send(packet)

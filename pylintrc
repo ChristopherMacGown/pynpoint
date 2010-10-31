@@ -89,7 +89,8 @@ no-docstring-rgx=((__.*__)|([tT]est.*)|setUp|tearDown)$
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=80
+# Make this match pep8 so I don't always have to run both.
+max-line-length=79
 
 # Maximum number of lines in a module
 max-module-lines=1000
@@ -190,7 +191,10 @@ max-attributes=7
 min-public-methods=0
 
 # Maximum number of public methods for a class (see R0904).
-max-public-methods=20
+#max-public-methods=20
+# Bump this because pyredis has a bazillion public methods and I want to 
+# inherit from it instead of hacking __getattr__. 
+max-public-methods=31
 
 
 [IMPORTS]

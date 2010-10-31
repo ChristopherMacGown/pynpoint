@@ -5,8 +5,9 @@ Defines the pynpoint protocol with a Packet handler.
 
 import json
 import struct
+from pynpoint.protocol import handlers
 
-SIZE_PACK_FORMAT = ">H"
+SIZE_PACK_FORMAT = ">I"
 VERSION_PACK_FORMAT = ">B"
 
 # PROTOCOL STUFF
@@ -25,21 +26,13 @@ class ProtocolError(Exception):
     pass
 
 
-class Announcement(object):
-    pass
+def dispatch_handler(packet):
+    """ When we get a packet, dispatch the appropriate handler """
 
-class Export(object):
-    pass
-
-class Query(object):
-    pass
-
-
-def dispatch_job_handler(packet):
-    request_types = { 
-        "hi!": Announcement,
-        "i have": Export,
-        "heard of?": Query,
+    request_types = {
+        "hi!": handlers.Announcement,
+        "i have": handlers.Export,
+        "heard of?": handlers.Query,
     }
 
     try:
@@ -48,6 +41,7 @@ def dispatch_job_handler(packet):
         raise ProtocolError("invalid request_type %s" % packet.request_type)
 
     return handler(packet.payload)
+
 
 class Packet(object):
     """ A pynpoint packet """

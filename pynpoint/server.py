@@ -59,7 +59,9 @@ class Server(object):
     The pydislocated gossip protocol listener
     """
 
-    def __init__(self, host=config.HOSTNAME, port=config.PORT):
+    _config = config.Config()
+
+    def __init__(self, host=_config.server_hostname, port=_config.server_port):
         """ Initialize everything """
 
         self.host = host

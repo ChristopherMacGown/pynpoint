@@ -2,8 +2,7 @@
 
 import eventlet
 
-from pynpoint import config
-from pynpoint import protocol
+from pynpoint import config, protocol
 
 
 class ClientError(Exception):
@@ -13,8 +12,9 @@ class ClientError(Exception):
 
 class Client(object):
     """ A pynpoint client """
+    _config = config.Config()
 
-    def __init__(self, host=config.HOSTNAME, port=config.PORT):
+    def __init__(self, host=_config.server_hostname, port=_config.server_port):
         self.socket = eventlet.connect((host, port))
 
     def recv(self):
