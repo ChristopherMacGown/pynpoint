@@ -4,16 +4,6 @@
 import json
 
 
-# TODO(chris): Turn this into an array of expected locations for configurations
-#              /etc/pynpoint.cfg, ~/.pynpoint.cfg, ./pynpoint.cfg (for dev)
-DEFAULT_CONFIG_FILE = "pynpoint.cfg"
-
-# TODO(chris): Create a default config dict… oh! Put it in __shared_state so
-#              the Config() object auto initializes with sane defaults.
-
-DEFAULT_CONFIG_DICT = {}
-
-
 class ConfigError(Exception):
     """ A config error """
     pass
@@ -28,17 +18,24 @@ class Config(object):
        {"server": {"hostname": "somehost"}} -> Config().server_hostname
     """
 
+    __default_configs = ("pynpoint.cfg",        # Sane Defaults
+                         "/etc/pynpoint.cfg",   # Site level configs
+                         "~/.pynpoint.cfg")     # Are we running as a user?
     __shared_state = {}
 
-    def __new__(cls, config_file=DEFAULT_CONFIG_FILE):
+    def __new__(cls, config_files=__default_configs):
         self = object.__new__(cls)
         self.__dict__ = cls.__shared_state
         return self
 
-    def __init__(self, config_file=DEFAULT_CONFIG_FILE):
+    def __init__(self, config_files=__default_configs):
         if not self.__dict__:
             print "Assimilating your biological distinctiveness"
-            self._parse_config_file(config_file)
+            for config_file in config_files:
+                self._parse_config_file(config_file)
+
+            if not self.__dict__:
+                raise ConfigError("Didn't find configuration files, bailing.")
 
     def __getattr__(self, item):
         if item in self.__dict__:
@@ -60,5 +57,7 @@ class Config(object):
                     for (item, value) in section.items():
                         config_attr = "%s_%s" % (section_name, item)
                         self.__setattr__(config_attr, value)
-        except (IOError, TypeError, ValueError) as e:
+        except IOError as e:
+            pass
+        except (TypeError, ValueError) as e:
             raise ConfigError(e.args)
