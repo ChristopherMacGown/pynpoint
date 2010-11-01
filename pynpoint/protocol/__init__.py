@@ -26,7 +26,7 @@ class ProtocolError(Exception):
     pass
 
 
-def dispatch_handler(packet):
+def get_packet_handler(packet):
     """ When we get a packet, dispatch the appropriate handler """
 
     request_types = {
@@ -40,7 +40,7 @@ def dispatch_handler(packet):
     except KeyError:
         raise ProtocolError("invalid request_type %s" % packet.request_type)
 
-    return handler(packet.payload)
+    return handler
 
 
 class Packet(object):

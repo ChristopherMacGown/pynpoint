@@ -1,12 +1,11 @@
 import unittest
 from pynpoint import redis
 from pynpoint.config import Config
+from tests import common
 
 class RedisTestCase(unittest.TestCase):
     def setUp(self):
-        # Clear out the shared state
-        self.config = Config()
-        self.config._clear()
+        common.reset_config()
 
         self.config = Config(config_files=["tests/data/redis.cfg"])
         self.redis = redis.Redis(config=self.config)
