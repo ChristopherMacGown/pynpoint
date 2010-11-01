@@ -5,6 +5,11 @@ from pynpoint.config import Config, ConfigError
 class ConfigTestCase(unittest.TestCase):
     _test_good_config_file = "tests/data/good.cfg"
     _test_bad_config_file = "tests/data/bad.cfg"
+
+    def setUp(self):
+        # Clear out the shared state
+        self.config = Config()
+        self.config._clear()
     
     def test_that_json_parsing_works(self):
         config = Config(config_files=[self._test_good_config_file])

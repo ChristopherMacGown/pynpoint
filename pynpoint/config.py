@@ -61,3 +61,7 @@ class Config(object):
             pass
         except (TypeError, ValueError) as e:
             raise ConfigError(e.args)
+
+    def _clear(self):
+        """ ONLY FOR TESTING """
+        self.__shared_state.clear()
