@@ -46,10 +46,8 @@ class FriendlyConnection(object):
 
                 packet = packet + self.socket.recv(1024)
 
-            print packet
             packet = protocol.Packet.decode(packet)
-            print packet
-            return True
+            return protocol.handle_packet(packet)
         except CloseSession:
             return False
 

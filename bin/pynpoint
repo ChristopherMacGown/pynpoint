@@ -1,3 +1,3 @@
-import pynpoint
-server = pynpoint.server.Server()
+from pynpoint import server
+server = server.Server()
 server.run()

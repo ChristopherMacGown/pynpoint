@@ -24,10 +24,10 @@ class Redis(object):
             self.conn = pyredis.Redis(**kwargs)
 
     def __getattr__(self, name):
-        def call(*args):
+        def call(*args, **kwargs):
             """ Pass through the query to our redis connection """
             cmd = getattr(self.conn, name)
-            return cmd(*args)
+            return cmd(*args, **kwargs)
 
         if name in self.__dict__:
             return self.__dict__.get(name)

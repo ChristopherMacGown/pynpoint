@@ -26,8 +26,15 @@ class ProtocolError(Exception):
     pass
 
 
+def handle_packet(packet):
+    """ Call the appropriate handler for our packet """
+
+    handler = get_packet_handler(packet)
+    print handler.handle(packet.payload)
+
+
 def get_packet_handler(packet):
-    """ When we get a packet, dispatch the appropriate handler """
+    """ Return the appropriate handler for the packet """
 
     request_types = {
         "hi!": handlers.Announcement,
