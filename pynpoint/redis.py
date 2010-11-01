@@ -1,14 +1,15 @@
 """ pynpoint redis client """
 
-import pyredis
+from __future__ import absolute_import
+import redis as pyredis
 from pynpoint.config import Config
 
 
-class Redis(pyredis.Redis):
-    """ A Borg-style Redis client class. """
+class Redis(object):
+    """ A Borg-style wrapper for Redis client class. """
     __shared_state = {}
 
-    def __new__(cls):
+    def __new__(cls, config=Config()):
         self = object.__new__(cls)
         self.__dict__ = cls.__shared_state
         return self
@@ -20,4 +21,15 @@ class Redis(pyredis.Redis):
                       "port": config.redis_port,
                       "db": config.redis_db}
 
-            pyredis.Redis.__init__(self, **kwargs)
+            self.conn = pyredis.Redis(**kwargs)
+
+    def __getattr__(self, name):
+        def call(*args):
+            """ Pass through the query to our redis connection """
+            cmd = getattr(self.conn, name)
+            return cmd(*args)
+
+        if name in self.__dict__:
+            return self.__dict__.get(name)
+
+        return call
