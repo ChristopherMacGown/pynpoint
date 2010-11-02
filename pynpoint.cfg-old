@@ -1,0 +1,14 @@
+{
+    "default": {
+        "ttl": 60
+    },
+    "redis": {
+        "hostname": "127.0.0.1",
+        "port": 6379,
+        "db": 0
+    },
+    "server": {
+        "hostname": "127.0.0.1",
+        "port": 9999
+    }
+}

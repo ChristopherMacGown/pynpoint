@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """ pynpoint config singleton """
 
-import json
-
-
 class ConfigError(Exception):
     """ A config error """
     pass
@@ -43,21 +40,43 @@ class Config(object):
         else:
             return None
 
+    def _parse_config_yaml(self, cfg):
+        try:
+            import yaml
+            return yaml.load(cfg) # Returns None
+        except yaml.ParserError as e:
+            raise ValueError(e.args)
+        except ImportError:
+            return None
+
+    def _parse_config_json(self, cfg):
+        try:
+            import json
+            return json.JSONDecoder().decode(cfg)
+        except (ImportError, ValueError):
+            return None
+
     def _parse_config_file(self, config_file):
         """ Parses a configuration file as a dict and populates __dict__
         with them. __dict__ is Config.__shared_state
         """
 
+        parsers = (self._parse_config_json, self._parse_config_yaml)
+
         try:
             with open(config_file) as fp:
                 cfg = fp.read()
-                config = json.JSONDecoder().decode(cfg)
+
+                for parser in parsers:
+                    config = parser(cfg)
+                    if config:
+                        break
 
                 for (section_name, section) in config.items():
                     for (item, value) in section.items():
                         config_attr = "%s_%s" % (section_name, item)
                         self.__setattr__(config_attr, value)
-        except IOError as e:
+        except (AttributeError, TypeError, IOError):
             pass
-        except (TypeError, ValueError) as e:
+        except ValueError as e:
             raise ConfigError(e.args)
