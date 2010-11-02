@@ -87,5 +87,5 @@ class Query(RequestHandler):
     def _validate_payload(cls, payload):
         """ Validates the payload """
         RequestHandler._validate_payload(payload)
-        assert payload['type'] 
+        assert payload['type']
         assert payload['type'] in ("hosts", "services", "addresses", "disks")
