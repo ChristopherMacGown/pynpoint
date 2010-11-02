@@ -40,14 +40,14 @@ class Config(object):
         else:
             return None
 
-    def _parse_config_yaml(self, cfg):
+    def __parse_config_yaml(self, cfg):
         try:
             import yaml
-            return yaml.load(cfg) # Returns None
+            return yaml.load(cfg) # Returns None which sucks.
         except yaml.ParserError as e:
             raise ValueError(e.args)
 
-    def _parse_config_json(self, cfg):
+    def __parse_config_json(self, cfg):
         import json
         return json.JSONDecoder().decode(cfg)
 
@@ -56,7 +56,7 @@ class Config(object):
         with them. __dict__ is Config.__shared_state
         """
 
-        parsers = (self._parse_config_json, self._parse_config_yaml)
+        parsers = (self.__parse_config_json, self.__parse_config_yaml)
 
         try:
             with open(config_file) as fp:
