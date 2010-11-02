@@ -3,6 +3,7 @@ from pynpoint import redis
 from pynpoint.config import Config
 from tests import common
 
+
 class RedisTestCase(unittest.TestCase):
     def setUp(self):
         common.reset_config()
@@ -17,6 +18,11 @@ class RedisTestCase(unittest.TestCase):
         local_redis = redis.Redis(config=self.config)
         self.assertEqual(local_redis.conn, self.redis.conn)
         self.assertNotEqual(local_redis, self.redis)
+
+    def test_shared_state(self):
+        self.redis.foo = 'bar'
+        self.assertEqual(self.redis.foo, 'bar')
+        self.assertEqual(self.redis.__getattr__('foo'), 'bar')
 
     def test_push_to_a_list(self):
         self.assertTrue(self.redis.lpush('list', 1))

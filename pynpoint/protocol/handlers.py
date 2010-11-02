@@ -41,11 +41,8 @@ class Announcement(RequestHandler):
         """ Handle a hello """
         cls._validate_payload(payload)
 
-        if not host: 
-            try:
-                host = payload['host']
-            except KeyError:
-                raise RequestError("Invalid payload: %s" % payload)
+        if not host:
+            host = payload['host']
 
         key = 'host_%s' % host
         return cls._store(key, payload)
@@ -65,7 +62,7 @@ class Export(RequestHandler):
 
 class Query(RequestHandler):
     """ Query handler """
-    
+
     @classmethod
     def handle(cls, payload, host=None):
         """ Handle an inbound query """
@@ -77,7 +74,7 @@ class Query(RequestHandler):
         result = []
         for host in cls._r.keys(pattern="host_*"):
             host = json.JSONDecoder().decode(cls._r.get(host))
-                
+
             query_values = host.get(query_key, None)
             if query_values:
                 if query_value in query_values:
@@ -85,7 +82,7 @@ class Query(RequestHandler):
 
         if result:
             return result
-        
+
     @classmethod
     def _validate_payload(cls, payload):
         """ Validates the payload """

@@ -9,5 +9,5 @@ port = config.server_port
 announcement = protocol.Packet('hi!', {'host': host, 'port': port, 'addresses': [host]})
 query = protocol.Packet('heard of?', {'type': 'addresses', 'value': host})
 
+client.Client().send(announcement)
 client.Client().send(query)
-#client.Client().send(announcement)

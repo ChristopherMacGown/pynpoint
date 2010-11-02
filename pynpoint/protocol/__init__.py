@@ -30,7 +30,7 @@ def handle_packet(packet):
     """ Call the appropriate handler for our packet """
 
     handler = get_packet_handler(packet)
-    print handler.handle(packet.payload)
+    return handler.handle(packet.payload)
 
 
 def get_packet_handler(packet):
@@ -103,5 +103,5 @@ class Packet(object):
                 body = json.JSONDecoder().decode(body)
                 return Packet(req, body)
 
-        except (ValueError, ProtocolError):
+        except (struct.error, ValueError, ProtocolError):
             raise ProtocolError("invalid packet: %s" % packet)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ pynpoint config singleton """
 
+
 class ConfigError(Exception):
     """ A config error """
     pass
@@ -35,36 +36,25 @@ class Config(object):
                 raise ConfigError("Didn't find configuration files, bailing.")
 
     def __getattr__(self, item):
-        if item in self.__dict__:
-            return self[item]
-        else:
-            return None
-
-    def __parse_config_yaml(self, cfg):
-        try:
-            import yaml
-            return yaml.load(cfg) # Returns None which sucks.
-        except yaml.ParserError as e:
-            raise ValueError(e.args)
-
-    def __parse_config_json(self, cfg):
-        import json
-        return json.JSONDecoder().decode(cfg)
+        return self.__dict__.get(item, None)
 
     def _parse_config_file(self, config_file):
         """ Parses a configuration file as a dict and populates __dict__
         with them. __dict__ is Config.__shared_state
         """
 
-        parsers = (self.__parse_config_json, self.__parse_config_yaml)
+        parsers = (parse_config_json, parse_config_yaml)
 
         try:
             with open(config_file) as fp:
                 cfg = fp.read()
 
+                config = None
                 for parser in parsers:
                     try:
                         config = parser(cfg)
+                        if config:
+                            break
                     except (ValueError, ImportError):
                         pass
 
@@ -74,3 +64,20 @@ class Config(object):
                         self.__setattr__(config_attr, value)
         except (AttributeError, TypeError, IOError):
             pass
+
+
+def parse_config_yaml(cfg):
+    """ Lazy load yaml and try to load a configuration """
+
+    try:
+        import yaml
+        return yaml.load(cfg)  # Returns None which sucks.
+    except yaml.parser.ParserError as e:
+        raise ValueError(e.args)
+
+
+def parse_config_json(cfg):
+    """ Lazy load json and try to decode the configuration """
+
+    import json
+    return json.JSONDecoder().decode(cfg)
