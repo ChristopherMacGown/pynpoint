@@ -46,15 +46,10 @@ class Config(object):
             return yaml.load(cfg) # Returns None
         except yaml.ParserError as e:
             raise ValueError(e.args)
-        except ImportError:
-            return None
 
     def _parse_config_json(self, cfg):
-        try:
-            import json
-            return json.JSONDecoder().decode(cfg)
-        except (ImportError, ValueError):
-            return None
+        import json
+        return json.JSONDecoder().decode(cfg)
 
     def _parse_config_file(self, config_file):
         """ Parses a configuration file as a dict and populates __dict__
@@ -68,9 +63,10 @@ class Config(object):
                 cfg = fp.read()
 
                 for parser in parsers:
-                    config = parser(cfg)
-                    if config:
-                        break
+                    try:
+                        config = parser(cfg)
+                    except (ValueError, ImportError):
+                        pass
 
                 for (section_name, section) in config.items():
                     for (item, value) in section.items():
@@ -78,5 +74,3 @@ class Config(object):
                         self.__setattr__(config_attr, value)
         except (AttributeError, TypeError, IOError):
             pass
-        except ValueError as e:
-            raise ConfigError(e.args)
