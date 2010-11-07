@@ -1,5 +1,23 @@
 # -*- coding: utf-8 -*-
+
 """ pynpoint config singleton """
+
+
+def parse_config_yaml(cfg):
+    """ Lazy load yaml and try to load a configuration """
+
+    try:
+        import yaml
+        return yaml.load(cfg)  # Returns None which sucks.
+    except yaml.parser.ParserError as e:
+        raise ValueError(e.args)
+
+
+def parse_config_json(cfg):
+    """ Lazy load json and try to decode the configuration """
+
+    import json
+    return json.JSONDecoder().decode(cfg)
 
 
 class ConfigError(Exception):
@@ -64,20 +82,3 @@ class Config(object):
                         self.__setattr__(config_attr, value)
         except (AttributeError, TypeError, IOError):
             pass
-
-
-def parse_config_yaml(cfg):
-    """ Lazy load yaml and try to load a configuration """
-
-    try:
-        import yaml
-        return yaml.load(cfg)  # Returns None which sucks.
-    except yaml.parser.ParserError as e:
-        raise ValueError(e.args)
-
-
-def parse_config_json(cfg):
-    """ Lazy load json and try to decode the configuration """
-
-    import json
-    return json.JSONDecoder().decode(cfg)

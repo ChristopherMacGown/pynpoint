@@ -2,9 +2,13 @@
 
 import unittest
 from json import JSONEncoder, JSONDecoder
-from pynpoint import config, protocol, redis
-from pynpoint.protocol import handlers
 from tests import common
+
+from pynpoint import config, protocol, redis
+from pynpoint.errors import ProtocolError, RequestError
+from pynpoint.mixins import Mixin
+from pynpoint.protocol import handlers
+from pynpoint.protocol.handlers import announcement, export, query
 
 
 class ProtocolTestCase(unittest.TestCase):
@@ -52,63 +56,38 @@ class ProtocolHandlersTestCase(unittest.TestCase):
 
 
         self.announcement = protocol.Packet('hi!', {'host': '123.45.67.89'})
-        self.export = protocol.Packet('i have', {"stuff": 2})
+        self.export = protocol.Packet('i have', {'host': '123.45.67.89', 
+                                                 "type": 'addresses',
+                                                 'export':["123.45.67.89"]})
         self.query = protocol.Packet("heard of?", {"type": 'addresses',
                                                    "value": '123.45.67.8'})
 
-    def test_get_packet_handler(self):
-        expected_handlers = [handlers.Announcement,
-                             handlers.Export,
-                             handlers.Query]
+    def bad_data(self, request_type):
+        bd = [None, [], "", {}]
+        return [protocol.Packet(request_type, d) for d in bd]
 
-        actual_handlers = [protocol.get_packet_handler(x) for x in
-                           (self.announcement, self.export, self.query)]
-
-        self.assertRaises(protocol.ProtocolError, 
-                          protocol.get_packet_handler, 
-                          protocol.Packet('wrong_packet', {}))
-
-        for ex, ac in zip(expected_handlers, actual_handlers):
-            self.assertEqual(ex, ac)
-
-    def test_validate_export(self):
-        validator = handlers.Query._validate_payload
-        # No way to assertNothingRaised
-        self.assertEqual(None, validator(self.query.payload))
+    def test_handle_export(self):
+        handler = protocol.handle_packet
+        self.assertTrue(handler(self.export))
 
         # Validator raises on invalid payload
-        self.assertRaises(handlers.RequestError, validator, None)
-        self.assertRaises(handlers.RequestError, validator, [])
-        self.assertRaises(handlers.RequestError, validator, "")
-        self.assertRaises(handlers.RequestError, validator, {})
-
-
-    def test_validate_announcement(self):
-        validator = handlers.Announcement._validate_payload
-        # No way to assertNothingRaised
-        self.assertEqual(None, validator(self.announcement.payload))
-
-        # Validator raises on invalid payload
-        self.assertRaises(handlers.RequestError, validator, None)
-        self.assertRaises(handlers.RequestError, validator, [])
-        self.assertRaises(handlers.RequestError, validator, "")
-        self.assertRaises(handlers.RequestError, validator, {})
+        for bad_packet in self.bad_data('i have'):
+            self.assertRaises(RequestError, handler, bad_packet)
 
     def test_handle_announcement(self):
-        self.assertTrue(protocol.handle_packet(self.announcement))
+        handler = protocol.handle_packet
+        self.assertTrue(handler(self.announcement))
 
-
-    def test_validate_query(self):
-        validator = handlers.Query._validate_payload
-        # No way to assertNothingRaised
-        self.assertEqual(None, validator(self.query.payload))
 
         # Validator raises on invalid payload
-        self.assertRaises(handlers.RequestError, validator, None)
-        self.assertRaises(handlers.RequestError, validator, [])
-        self.assertRaises(handlers.RequestError, validator, "")
-        self.assertRaises(handlers.RequestError, validator, {})
+        for bad_packet in self.bad_data('hi!'):
+            self.assertRaises(RequestError, handler, bad_packet)
 
     def test_handle_query(self):
-        self.assertTrue(protocol.handle_packet(self.query))
-        self.assertEqual(protocol.handle_packet(self.query), [self.test_host])
+        handler = protocol.handle_packet
+        self.assertTrue(handler(self.query))
+        self.assertEqual(handler(self.query), [self.test_host])
+
+        # Validator raises on invalid payload
+        for bad_packet in self.bad_data('heard of?'):
+            self.assertRaises(RequestError, handler, bad_packet)

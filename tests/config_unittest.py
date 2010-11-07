@@ -10,12 +10,16 @@ class ConfigTestCase(unittest.TestCase):
     def setUp(self):
         common.reset_config()
 
+    def teardown(self):
+        common.reset_config()
+
     def test_yaml_config(self):
         cfg = parse_config_yaml("---\nfoo: 'bar'")
         self.assertEqual(cfg, {'foo':'bar'})
         self.assertRaises(ValueError, parse_config_yaml, "{{}")
 
     def test_json_config(self):
+        self.assertTrue(parse_config_json('{"foo": "bar"}'))
         cfg = parse_config_json('{"foo": "bar"}')
         self.assertEqual(cfg, {'foo':'bar'})
         self.assertRaises(ValueError, parse_config_json, "{{}")

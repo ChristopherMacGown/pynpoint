@@ -5,6 +5,7 @@ Defines the pynpoint protocol with a Packet handler.
 
 import json
 import struct
+from pynpoint.errors import ProtocolError
 from pynpoint.protocol import handlers
 
 SIZE_PACK_FORMAT = ">I"
@@ -20,34 +21,11 @@ TERMINATOR = "!!"
 SUPPORTED_VERSIONS = [VERSION]
 
 
-class ProtocolError(Exception):
-    """ A generic protocol error class """
-    # TODO(chris): Handle logging here.
-    pass
-
-
 def handle_packet(packet):
     """ Call the appropriate handler for our packet """
 
-    handler = get_packet_handler(packet)
-    return handler.handle(packet.payload)
-
-
-def get_packet_handler(packet):
-    """ Return the appropriate handler for the packet """
-
-    request_types = {
-        "hi!": handlers.Announcement,
-        "i have": handlers.Export,
-        "heard of?": handlers.Query,
-    }
-
-    try:
-        handler = request_types[packet.request_type]
-    except KeyError:
-        raise ProtocolError("invalid request_type %s" % packet.request_type)
-
-    return handler
+    handler = handlers.RequestHandler(packet)
+    return handler.handle()
 
 
 class Packet(object):
