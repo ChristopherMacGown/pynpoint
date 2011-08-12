@@ -23,3 +23,20 @@ class ProtocolError(Exception):
     """ A generic protocol error class """
     # TODO(chris): Handle logging here.
     pass
+
+
+class ClassNotFound(IOError):
+    def __init__(self, class_name=None):
+        message = "Could not import %(class_name)s" % locals()
+
+        super(IOError, self).__init__(message)
+
+
+class ExecutionError(IOError):
+    def __init__(self, stdout=None, stderr=None, return_code=None, cmd=None): 
+        message = ("Command failed: %(cmd)s\n"
+                   "return_code: %(return_code)s\n"
+                   "stdout: %(stdout)r\n"
+                   "stderr: %(stderr)r\n" % locals())
+
+        super(IOError, self).__init__(message)

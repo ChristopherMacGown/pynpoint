@@ -14,5 +14,4 @@
    limitations under the License.
 """
 
-
-#from pynpoint import config, protocol, server
+import pynpoint.providers
