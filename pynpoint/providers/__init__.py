@@ -43,23 +43,42 @@ def load_providers(providers=None, unload_first=True):
     return _registered_providers
 
 
-def provides(provided, provider=None):
-    if not provider:
-        provider = _provider_mod
+def inject_provider_caller(package):
+    _injections = {"__providers__": [],
+                   "gather": lambda: dict([(k, v()) for k, v
+                                                    in package.__providers__]),
+                  }
 
+    for name, injection in _injections.items():
+        if not getattr(package, name, None):
+            setattr(package, name, injection)
+
+
+def provides(provided, provider=_provider_mod):
     def wrap(fn):
         def inner(*args, **kwargs):
             return fn(*args, **kwargs)
 
         _provider = sys.modules[provider]
+        _parent = sys.modules[_provider.__package__]
+        inject_provider_caller(_parent)
+        inject_provider_caller(_provider)
         setattr(_provider, provided, inner)
 
         # Hack to make sure we're always displaying the right names.
-        getattr(_provider, provided).__name__ = provided
+        new_fn = getattr(_provider, provided)
+        new_fn.__name__ = provided
+
+        _parent.__providers__.append((provider.split('.')[-1], 
+                                      _provider.gather))
+        _provider.__providers__.append((provided, new_fn))
 
         return inner
     return wrap
 
 
 def command(*cmd, **kwargs):
-    return utils.execute(*cmd, **kwargs).strip()
+    split_char = kwargs.pop('split_char', "\n")
+    res = str.split(utils.execute(*cmd, **kwargs).strip(), split_char)
+
+    return res if len(res) > 1 else res[0]

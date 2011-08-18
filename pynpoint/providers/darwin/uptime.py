@@ -14,26 +14,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import re
+import time
 
 from pynpoint import providers
 
-__module__ = str.join('.', (__package__, "ps"))
+__module__ = str.join('.', (__package__, "uptime"))
 
-PS_RE = re.compile(r"(?P<uid>\d+)\s+"
-                   r"(?P<pid>\d+)\s+"
-                   r"(?P<ppid>\d+)\s+"
-                   r"(?P<cpu>\d+)\s+"
-                   r"(?P<start_time>.*?)\s+"
-                   r"(?P<tty>\?\?|ttys\d+)\s+"
-                   r"(?P<time>.*?)\s+"
-                   r"(?P<command>.*)")
+# todo(chris): Make this work when pynpoint is daemonized.
+UPTIME_RE = re.compile("kern.boottime:.*\s+(?P<uptime_secs>\d+),")
+m = UPTIME_RE.search(providers.command("sysctl", "kern.boottime"))
+UPTIME = int(m.group("uptime_secs"))
+CURR_TIME = time.time()
 
-@providers.provides("ps", provider=__module__)
+
+@providers.provides("uptime_secs", provider=__module__)
 def _():
-    _processes = []
-    for process in providers.command("ps", "-ef"):
-        match = PS_RE.search(process)
-        if match:
-            _processes.append(match.groupdict())
-    return _processes
+    return int(CURR_TIME - UPTIME)
+
+
+@providers.provides("uptime", provider=__module__)
+def _():
+    cur_dt = datetime.datetime.fromtimestamp(CURR_TIME)
+    upt_dt = datetime.datetime.fromtimestamp(UPTIME)
+
+    return str(cur_dt - upt_dt)

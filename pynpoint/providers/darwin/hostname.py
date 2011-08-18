@@ -14,9 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pynpoint.providers.darwin import fs
-from pynpoint.providers.darwin import hostname
-from pynpoint.providers.darwin import kernel
-from pynpoint.providers.darwin import platform
-from pynpoint.providers.darwin import ps
-from pynpoint.providers.darwin import uptime
+
+import re
+
+from pynpoint import providers
+
+__module__ = str.join('.', (__package__, "hostname"))
+
+
+@providers.provides("hostname", provider=__module__)
+def _():
+    return providers.command("hostname", "-s")
+
+
+@providers.provides("fqdn", provider=__module__)
+def _():
+    return providers.command("hostname")

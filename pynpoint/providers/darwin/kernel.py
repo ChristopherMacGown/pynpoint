@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import re
-import sys
 
 from pynpoint import providers
 
@@ -33,19 +32,18 @@ KERNEL_MODULE_RE = re.compile(r"(?P<index>\d+)\s+"
 
 
 @providers.provides("kernel", provider=__module__)
-def command():
+def _():
     _kernel = {}
     _kernel["name"] = providers.command("uname", "-s")
     _kernel["release"] = providers.command("uname", "-v")
     _kernel["machine"] = providers.command("uname", "-m")
     _kernel["version"] = providers.command("uname", "-r")
-    _kernel['modules'] = modules()
 
     return _kernel
 
 
 @providers.provides("modules", provider=__module__)
-def command():
+def _():
     def munge(k, v):
         if re.match(MEMADDR_RE_STR, v) or k == "refs":
             v = int(v, 0)
@@ -53,7 +51,7 @@ def command():
         return k, v
 
     _modules = []
-    for module in str.split(providers.command("kextstat", "-k", "-l"), '\n'):
+    for module in providers.command("kextstat", "-k", "-l"):
         match = KERNEL_MODULE_RE.search(module)
         if match:
             _modules.append(dict([munge(k, v) for k, v 

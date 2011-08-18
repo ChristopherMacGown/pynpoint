@@ -18,22 +18,25 @@ import re
 
 from pynpoint import providers
 
-__module__ = str.join('.', (__package__, "ps"))
+__module__ = str.join('.', (__package__, "platform"))
 
-PS_RE = re.compile(r"(?P<uid>\d+)\s+"
-                   r"(?P<pid>\d+)\s+"
-                   r"(?P<ppid>\d+)\s+"
-                   r"(?P<cpu>\d+)\s+"
-                   r"(?P<start_time>.*?)\s+"
-                   r"(?P<tty>\?\?|ttys\d+)\s+"
-                   r"(?P<time>.*?)\s+"
-                   r"(?P<command>.*)")
+# todo(chris): Clean this up when daemonized.
+__platform__ =  dict([str.split(l, ":\t") for l
+                                          in providers.command(
+                                                        "/usr/bin/sw_vers")])
 
-@providers.provides("ps", provider=__module__)
+
+
+@providers.provides("platform", provider=__module__)
 def _():
-    _processes = []
-    for process in providers.command("ps", "-ef"):
-        match = PS_RE.search(process)
-        if match:
-            _processes.append(match.groupdict())
-    return _processes
+    return __platform__["ProductName"]
+
+
+@providers.provides("platform_version", provider=__module__)
+def _():
+    return __platform__["ProductVersion"]
+
+
+@providers.provides("platform_build", provider=__module__)
+def _():
+    return __platform__["BuildVersion"]
