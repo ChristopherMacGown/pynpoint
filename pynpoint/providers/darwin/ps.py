@@ -29,8 +29,8 @@ PS_RE = re.compile(r"(?P<uid>\d+)\s+"
                    r"(?P<time>.*?)\s+"
                    r"(?P<command>.*)")
 
-@providers.provides("ps", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def ps():
     _processes = []
     for process in providers.command("ps", "-ef"):
         match = PS_RE.search(process)

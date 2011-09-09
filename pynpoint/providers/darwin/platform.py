@@ -26,17 +26,16 @@ __platform__ =  dict([str.split(l, ":\t") for l
                                                         "/usr/bin/sw_vers")])
 
 
-
-@providers.provides("platform", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def platform():
     return __platform__["ProductName"]
 
 
-@providers.provides("platform_version", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def platform_version():
     return __platform__["ProductVersion"]
 
 
-@providers.provides("platform_build", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def platform_build():
     return __platform__["BuildVersion"]

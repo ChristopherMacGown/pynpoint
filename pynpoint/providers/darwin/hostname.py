@@ -22,11 +22,11 @@ from pynpoint import providers
 __module__ = str.join('.', (__package__, "hostname"))
 
 
-@providers.provides("hostname", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def hostname():
     return providers.command("hostname", "-s")
 
 
-@providers.provides("fqdn", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def fqdn():
     return providers.command("hostname")

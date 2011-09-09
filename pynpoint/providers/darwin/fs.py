@@ -21,6 +21,7 @@ from pynpoint import providers
 
 __module__ = str.join('.', (__package__, "fs"))
 
+
 BLOCK_SIZE_RE = re.compile(r"Filesystem\s+(?P<block_size>\d+)-blocks")
 DF_RE = re.compile(r"(?P<device>.*?)\s+"
                    r"(?P<blocks>\d+)\s+"
@@ -34,20 +35,20 @@ MOUNTS_RE = re.compile(r"(?P<device>.*)\s+on\s+"
                        r"(?P<options>.*)\)")
 
 
-@providers.provides("mount", provider=__module__)
-def _():
-    _mounts = []
+@providers.provides(provider=__module__)
+def mount():
+    _mounts = {}
     for mount in providers.command("mount"):
         match = MOUNTS_RE.search(mount)
         if match:
             match = match.groupdict()
             match['options'] = str.split(match['options'], ', ')
-            _mounts.append(match)
+            _mounts[match.pop('device')] = match
     return _mounts
 
 
-@providers.provides("df", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def df():
     def munge(k, v):
         if re.match("\d+", v):
             v = int(v)
@@ -59,10 +60,10 @@ def _():
     _df = providers.command("df")
     _block_size = int(BLOCK_SIZE_RE.search(_df[0]).group("block_size"))
 
-    _mounts = []
+    _mounts = {}
     for mount in _df:
         match = DF_RE.search(mount)
         if match:
-            _mounts.append(dict([munge(k, v) for k, v
-                                             in match.groupdict().items()]))
+            match = dict([munge(k, v) for k, v in match.groupdict().items()])
+            _mounts[match.pop('device')] = match
     return _mounts

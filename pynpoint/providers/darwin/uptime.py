@@ -29,13 +29,15 @@ UPTIME = int(m.group("uptime_secs"))
 CURR_TIME = time.time()
 
 
-@providers.provides("uptime_secs", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def uptime_secs():
+    """Exposes the number of seconds the box has been up."""
     return int(CURR_TIME - UPTIME)
 
 
-@providers.provides("uptime", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def uptime():
+    """Exposes the current uptime of the box in human readable format."""
     cur_dt = datetime.datetime.fromtimestamp(CURR_TIME)
     upt_dt = datetime.datetime.fromtimestamp(UPTIME)
 

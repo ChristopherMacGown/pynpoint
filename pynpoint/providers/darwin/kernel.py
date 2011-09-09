@@ -31,8 +31,8 @@ KERNEL_MODULE_RE = re.compile(r"(?P<index>\d+)\s+"
                               r"\((?P<version>[0-9\.]+)\)" % locals())
 
 
-@providers.provides("kernel", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def kernel():
     _kernel = {}
     _kernel["name"] = providers.command("uname", "-s")
     _kernel["release"] = providers.command("uname", "-v")
@@ -42,18 +42,18 @@ def _():
     return _kernel
 
 
-@providers.provides("modules", provider=__module__)
-def _():
+@providers.provides(provider=__module__)
+def modules():
     def munge(k, v):
         if re.match(MEMADDR_RE_STR, v) or k == "refs":
             v = int(v, 0)
 
         return k, v
 
-    _modules = []
+    _modules = {}
     for module in providers.command("kextstat", "-k", "-l"):
         match = KERNEL_MODULE_RE.search(module)
         if match:
-            _modules.append(dict([munge(k, v) for k, v 
-                                              in match.groupdict().items()]))
+            match = dict([munge(k, v) for k, v in match.groupdict().items()])
+            _modules[match.pop('name')] = match
     return _modules

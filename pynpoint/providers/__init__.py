@@ -54,11 +54,12 @@ def inject_provider_caller(package):
             setattr(package, name, injection)
 
 
-def provides(provided, provider=_provider_mod):
+def provides(provider=_provider_mod):
     def wrap(fn):
         def inner(*args, **kwargs):
             return fn(*args, **kwargs)
 
+        provided = fn.__name__
         _provider = sys.modules[provider]
         _parent = sys.modules[_provider.__package__]
         inject_provider_caller(_parent)

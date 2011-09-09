@@ -17,6 +17,7 @@
 from pynpoint.providers.darwin import fs
 from pynpoint.providers.darwin import hostname
 from pynpoint.providers.darwin import kernel
+from pynpoint.providers.darwin import network
 from pynpoint.providers.darwin import platform
 from pynpoint.providers.darwin import ps
 from pynpoint.providers.darwin import uptime
