@@ -33,7 +33,11 @@ class ClassNotFound(IOError):
 
 
 class ExecutionError(IOError):
-    def __init__(self, stdout=None, stderr=None, return_code=None, cmd=None): 
+    def __init__(self, stdout=None, stderr=None, return_code=None, cmd=None):
+        self.stdout = stdout
+        self.stderr = stderr
+        self.return_code = return_code
+        self.cmd = cmd
         message = ("Command failed: %(cmd)s\n"
                    "return_code: %(return_code)s\n"
                    "stdout: %(stdout)r\n"
